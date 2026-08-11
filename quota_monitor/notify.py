@@ -276,7 +276,7 @@ def send_emails(payloads: list[tuple[str, str, str]], dry: bool) -> None:
         for rcpt, subject, html in payloads:
             msg = MIMEText(html, "html", "utf-8")
             msg["Subject"] = Header(subject, "utf-8")
-            msg["From"] = formataddr((str(Header("香港ID配额监控", "utf-8")), user))
+            msg["From"] = formataddr((str(Header("HKID_monitor", "utf-8")), user))
             msg["To"] = rcpt
             try:
                 s.sendmail(user, [rcpt], msg.as_string())
@@ -319,8 +319,7 @@ def earliest_line(events: list[dict]) -> str:
 _TIER_CARD = {"urgent": ("red", "🚨"), "notice": ("orange", "🔔"),
               "info": ("blue", "🎫")}
 STRAY_MAX = 2
-STRAY_HINT = ("⚡ 散号回流：通常几分钟内消失，很可能是黄牛转关失手——"
-              "抢到就是从他们手里截胡，手快专场")
+STRAY_HINT = ("Recycled Single Slots")
 
 
 def is_stray(events: list[dict]) -> bool:
