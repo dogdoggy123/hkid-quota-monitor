@@ -247,7 +247,7 @@ def build_email_html(lines: list[str], n_top: int, tier: str = "info",
 {stray_html}
 <ul style="padding-left:18px">{items}</ul>
 <p style="margin:16px 0">
-<a href="{BOOKING}" style="background:#0b57d0;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:600">Book / Change Booking Now</a>
+<a href="{BOOKING}" style="background:#0b57d0;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:600">Book Now</a>
 &nbsp;<a href="{DASHBOARD}" style="color:#0b57d0">View Live Dashboard</a></p>
 <p style="color:#999;font-size:12px;line-height:1.6">Quota changes quickly. Please refer to the official booking site.<br>
 Third-party notification tool, non-official service.</p></div>"""
