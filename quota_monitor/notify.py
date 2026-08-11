@@ -232,7 +232,7 @@ def build_email_html(lines: list[str], n_top: int, tier: str = "info",
                   if stray else "")
     cfg = cfg or {}
     n_all = n_top if n_all is None else n_all
-    extra = f"（{n_all} slots in total detected in this batch）" if n_all > n_top else ""
+    extra = f"（{n_all} slot(s) in total detected in this batch）" if n_all > n_top else ""
     if tier == "urgent":
         head_color, head = "#d03b3b", (f"🚨 {n_top} slot(s) released before "
                                        f"{cfg.get('urgent_before', 'soon')}, {extra}")
