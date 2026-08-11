@@ -34,9 +34,9 @@ STATE_PATH = DATA / "notify_state.json"
 
 # 用官方预约系统显示的地区名（接口 district 字段），别用「港岛办事处」这类
 # 内部称谓——用户在官网看到的是「湾仔」「长沙湾」，对不上会以为是两套数据
-OFFICE_NAMES = {"RHK": "湾仔", "RKO": "长沙湾", "RTK": "将军澳",
-                "FTO": "火炭", "TMO": "屯门", "YLO": "元朗"}
-STATUS_TEXT = {"g": "充足", "y": "少量"}
+OFFICE_NAMES = {"RHK": "Wan Chai", "RKO": "Cheung Sha Wan", "RTK": "Tseung Kwan O",
+                "FTO": "Fo Tan", "TMO": "Tuen Mun", "YLO": "Yuen Long"}
+STATUS_TEXT = {"g": "Available", "y": "Limited"}
 # fork 自部署时链接自动指向自己的仓库（CI 注入 GITHUB_REPOSITORY）
 REPO = os.environ.get("GITHUB_REPOSITORY", "chen1111-a/hkid-quota-monitor")
 _OWNER, _NAME = REPO.split("/", 1)
@@ -214,9 +214,9 @@ def compose(events: list[dict], cfg: dict) -> tuple[str, str]:
     # 凡是说「X 前有 N 个」的地方必须用 n_top，否则强提醒会报错数字
     n_top, n_all = tiers.count(tier), len(events)
     subject = {
-        "urgent": f"🚨 紧急放号：{cfg.get('urgent_before', '近期')} 前有 {n_top} 个名额！",
-        "notice": f"🔔 香港ID放号：{cfg.get('notice_before', '近期')} 前有 {n_top} 个名额",
-        "info": f"🎫 香港ID预约放号：{n_all} 个名额",
+        "urgent": f"🚨 Urgent: {n_top} HKID slot(s) released before {cfg.get('urgent_before', 'soon')}!",
+        "notice": f"🔔 HKID Slots Available: {n_top} slot(s) before {cfg.get('notice_before', 'soon')}",
+        "info": f"🎫 HKID Appointment Alert: {n_all} slot(s) available",
     }[tier]
     return subject, build_email_html(lines, n_top, tier, cfg, n_all,
                                      stray=is_stray(events))
@@ -234,23 +234,23 @@ def build_email_html(lines: list[str], n_top: int, tier: str = "info",
     n_all = n_top if n_all is None else n_all
     extra = f"（本批共检出 {n_all} 个）" if n_all > n_top else ""
     if tier == "urgent":
-        head_color, head = "#d03b3b", (f"🚨 {cfg.get('urgent_before', '近期')} 前有 "
-                                       f"{n_top} 个名额放出，手慢无{extra}")
+        head_color, head = "#d03b3b", (f"🚨 {n_top} slot(s) released before "
+                                       f"{cfg.get('urgent_before', 'soon')}, act fast!{extra}")
     elif tier == "notice":
-        head_color, head = "#b8860b", (f"🔔 {cfg.get('notice_before', '近期')} 前有 "
-                                       f"{n_top} 个名额放出{extra}")
+        head_color, head = "#b8860b", (f"🔔 {n_top} slot(s) released before "
+                                       f"{cfg.get('notice_before', 'soon')}{extra}")
     else:
-        head_color, head = "#0b57d0", f"🎫 检测到 {n_all} 个预约名额放出"
-    return f"""<div style="font-family:system-ui,'PingFang SC','Microsoft YaHei';max-width:560px">
+        head_color, head = "#0b57d0", f"🎫 {n_all} appointment slot(s) released"
+    return f"""<div style="font-family:system-ui;max-width:560px">
 <h2 style="color:{head_color};margin:0 0 6px">{head}</h2>
-<p style="color:#666;margin:0 0 12px">香港入境处智能身份证预约（检测时间 {_now().strftime('%m-%d %H:%M')} 港时）</p>
+<p style="color:#666;margin:0 0 12px">HK Immigration Dept Identity Card Appointment (Checked at {_now().strftime('%m-%d %H:%M')} HKT)</p>
 {stray_html}
 <ul style="padding-left:18px">{items}</ul>
 <p style="margin:16px 0">
-<a href="{BOOKING}" style="background:#0b57d0;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:600">立即去官方预约/改期</a>
-&nbsp;<a href="{DASHBOARD}" style="color:#0b57d0">查看实时看板</a></p>
-<p style="color:#999;font-size:12px;line-height:1.6">名额变动很快，以官方预约页实际为准。<br>
-第三方公益工具，非入境处官方服务。想停止提醒：给本邮箱另发一封主题为「退订」的新邮件即可。</p></div>"""
+<a href="{BOOKING}" style="background:#0b57d0;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:600">Book / Change Booking Now</a>
+&nbsp;<a href="{DASHBOARD}" style="color:#0b57d0">View Live Dashboard</a></p>
+<p style="color:#999;font-size:12px;line-height:1.6">Quota changes quickly. Please refer to the official booking site.<br>
+Third-party notification tool, non-official service.</p></div>"""
 
 
 def send_emails(payloads: list[tuple[str, str, str]], dry: bool) -> None:
@@ -299,10 +299,7 @@ class FeishuError(RuntimeError):
 
 
 def cn_date(iso: str | None) -> str:
-    """2026-09-01 -> 9月1日。阈值来自网页可编的 config，格式不对就原样退回，
-    宁可标题难看也不能让通知在字符串格式化上炸掉。"""
-    m = re.match(r"^\d{4}-(\d{2})-(\d{2})$", iso or "")
-    return f"{int(m.group(1))}月{int(m.group(2))}日" if m else (iso or "近期")
+    return iso or "soon"
 
 
 def earliest_line(events: list[dict]) -> str:
