@@ -5,5 +5,5 @@
   "_urgent_before": "大提醒线：🚨 邮件红头 + 飞书@所有人 + 看板红横幅",
   "urgent_before": "2026-10-01",
   "_notice_before": "小提醒线：🔔 前缀 + 看板黄横幅。与 monitor_before 一致时，凡推送必至少是小提醒。",
-  "notice_before": "2026-10-16"
+  "notice_before": "2026-10-15"
 }
